@@ -26,7 +26,9 @@
 int main(int argc, char* argv[]) {
 
     cap_rights_t rights;
+    mode_t fmode = S_IRUSR | S_IWUSR | S_IRGRP;
     int dirfd, errno;
+    FILE* ofp = stdout;
     char* infn = argv[2];
     char* outfn = argv[3];
     char cwd[1024];
@@ -81,7 +83,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Set rights on directory fd
+    // Set rights on directory fd ??
     //cap_rights_init(&rights, CAP_SEEK, CAP_READ, CAP_WRITE);
     //cap_rights_limit(dirfd, &rights);
 
@@ -101,6 +103,13 @@ int main(int argc, char* argv[]) {
         // Zero out key schedule
         memset(w, 0, 60*4*sizeof(w[0][0]));
         printf("Incorrect args:\n Usage: tiaes [e,d] <infile> <outfile>\n");
+    }
+
+
+    // Clean up file permissions
+    if (fchmodat(dirfd, outfn, fmode, AT_RESOLVE_BENEATH) == -1) {
+        printf("chmod 0640 on %s failed.", outfn);
+        perror("");
     }
 
     return 0;
