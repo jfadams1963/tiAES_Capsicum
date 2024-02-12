@@ -25,7 +25,7 @@
 
 int main(int argc, char* argv[]) {
 
-    cap_rights_t rights;
+    //cap_rights_t rights;
     mode_t fmode = S_IRUSR | S_IWUSR | S_IRGRP;
     int dirfd, errno;
     FILE* ofp = stdout;
@@ -88,8 +88,11 @@ int main(int argc, char* argv[]) {
     //cap_rights_limit(dirfd, &rights);
 
     // Enter capability mode
-    if (cap_enter() < 0 && errno != ENOSYS)
+    if (cap_enter() < 0 && errno != ENOSYS) {
         err(1, "Unable to enter capability mode");
+        memset(w, 0, 60*4*sizeof(w[0][0]));
+        return 1;
+    }
 
     if (*argv[1] == 'e') {
         // Call cbcenc()
@@ -108,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     // Clean up file permissions
     if (fchmodat(dirfd, outfn, fmode, AT_RESOLVE_BENEATH) == -1) {
-        printf("chmod 0640 on %s failed.", outfn);
+        printf("chmod 0640 on %s failed.\n", outfn);
         perror("");
     }
 
