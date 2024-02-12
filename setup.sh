@@ -1,3 +1,3 @@
 #!/bin/sh
-cp /workspace/Ti_Projects/.bashrc /home/gitpod/
+cp /workspace/tiAES_Capsicum/.bashrc /home/gitpod/
 #cat .bash-add >> /home/gitpod/.bashrc
