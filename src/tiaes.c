@@ -25,7 +25,7 @@
 
 int main(int argc, char* argv[]) {
 
-    //cap_rights_t rights;
+    cap_rights_t rights;
     mode_t fmode = S_IRUSR | S_IWUSR | S_IRGRP;
     int dirfd, errno;
     FILE* ofp = stdout;
@@ -83,9 +83,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Set rights on directory fd ??
-    //cap_rights_init(&rights, CAP_SEEK, CAP_READ, CAP_WRITE);
-    //cap_rights_limit(dirfd, &rights);
+    // Set rights on directory fd 
+    cap_rights_init(&rights, CAP_LOOKUP, CAP_CREATE, CAP_SEEK, CAP_READ, CAP_WRITE, CAP_FCHMOD);
+    cap_rights_limit(dirfd, &rights);
 
     // Enter capability mode
     if (cap_enter() < 0 && errno != ENOSYS) {

@@ -117,16 +117,16 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
 
     // Get infile fd for reading
     ifd = openat(dirfd, infn, O_RDONLY);
-    //perror("In cbcenc() trying openat():\n");
-    //printf("ifd = %d\n", ifd);
+    perror("Trying ifd = openat(dirfd, infn, O_RDONLY)\n");
+    printf("ifd = %d\n", ifd);
 
     // Open infile for reading
     in = fdopen(ifd, "r");
-    //perror("In cbcenc() trying fdopen() with ifd\n");
-    //printf("in = %d\n", in);
+    perror("Trying in = fdopen(ifd, \"r\")\n");
+    printf("in = %d\n", in);
     if ((ifd < 0) | (in == NULL) ) {
-        perror("Could not open input file for reading in cbcenc()!\n");
-        printf("%d \n", ifd);
+        perror("Could not open input file for reading.\n");
+        printf("Cleaning up and exiting gracefully.\n");
         // Zero out key schedule 
         memset(w, 0, 60*4*sizeof(w[0][0]));
         exit(1);
