@@ -111,24 +111,27 @@ void encr() {
 
 /* Implement CBC mode */
 void cbcenc(int dirfd, char* infn, char* outfn) {
+
     int i,r,c,s,b,sz,bsz,ifd,ofd;
     uchar ch,pd;
     FILE *in, *out;
 
     // Get infile fd for reading
     ifd = openat(dirfd, infn, O_RDONLY);
-    perror("Trying ifd = openat(dirfd, infn, O_RDONLY)\n");
+    printf("\n");
+    perror("Trying: ifd = openat(dirfd, infn, O_RDONLY)\n");
     printf("ifd = %d\n", ifd);
     printf("\n");
 
     // Open infile for reading
     in = fdopen(ifd, "r");
-    perror("Trying in = fdopen(ifd, \"r\")\n");
+    perror("Trying: in = fdopen(ifd, \"r\")\n");
     printf("in = %d\n", in);
     printf("\n");
     if ((ifd < 0) | (in == NULL) ) {
         perror("Could not open input file for reading.\n");
         printf("Cleaning up and exiting gracefully.\n");
+        printf("\n");
         // Zero out key schedule 
         memset(w, 0, 60*4*sizeof(w[0][0]));
         exit(1);
@@ -191,17 +194,22 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
                 i++;
             }
         }
+
         // State = state xor IV
         for (r=0; r<4; r++) {
             for (c=0; c<4; c++) {
                 st[r][c] = st[r][c] ^ iv[r][c];
             }
         }
+
         // Call encr()
         encr();
+
         // Copy state to next IV
         cpyst_iv();
+
         // Write bytes to outfile by _column_ !
+        // Check that the file stream is still open:
         if (out == NULL) {
             perror("out file not open for writing in cbcenc() 2!\n");
             // Zero out keymaterial, state and byte array

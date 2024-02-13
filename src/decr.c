@@ -159,18 +159,23 @@ void cbcdec(int dirfd, char* infn, char* outfn) {
 
             }
         }
+
         // Copy state to temp block
         cpyst_tb();
+
         // Call decr()
         decr();
+
         // State = state xor IV
         for (r=0; r<4; r++) {
             for (c=0; c<4; c++) {
                 st[r][c] = st[r][c] ^ iv[r][c];
             }
         }
+
         // Copy temp block to IV
         cpytb_iv();
+
         // Write decrypted bytes to byte array by _column_.
         for (c=0; c<4; c++) {
             for (r=0; r<4; r++) {
@@ -201,6 +206,7 @@ void cbcdec(int dirfd, char* infn, char* outfn) {
         memset(barr, 0, bsz*sizeof(barr[0]));
         exit(1);
     }
+
     // Write the array to out file
     for (i=0; i<sz; i++) {
         fputc(barr[i], out);

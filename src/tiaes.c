@@ -7,13 +7,9 @@
  * Usage: tiaes [e,d] <infile> <outfile>
  */
 
-#include <unistd.h>
-#include <errno.h>
-#include <err.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/capsicum.h>
 #include <readpassphrase.h>
+//#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "core.h"
 
@@ -84,8 +80,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Set rights on directory fd 
-    cap_rights_init(&rights, CAP_LOOKUP, CAP_CREATE, CAP_SEEK, CAP_READ, \
-                    CAP_WRITE, CAP_FCHMOD);
+    cap_rights_init(&rights, CAP_LOOKUP, CAP_CREATE, CAP_PREAD, \
+                    CAP_PWRITE, CAP_FCHMOD);
     cap_rights_limit(dirfd, &rights);
 
     // Enter capability mode
