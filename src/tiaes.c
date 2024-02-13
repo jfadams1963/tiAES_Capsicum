@@ -84,7 +84,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Set rights on directory fd 
-    cap_rights_init(&rights, CAP_LOOKUP, CAP_CREATE, CAP_SEEK, CAP_READ, CAP_WRITE, CAP_FCHMOD);
+    cap_rights_init(&rights, CAP_LOOKUP, CAP_CREATE, CAP_SEEK, CAP_READ, \
+                    CAP_WRITE, CAP_FCHMOD);
     cap_rights_limit(dirfd, &rights);
 
     // Enter capability mode

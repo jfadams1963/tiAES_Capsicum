@@ -119,11 +119,13 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
     ifd = openat(dirfd, infn, O_RDONLY);
     perror("Trying ifd = openat(dirfd, infn, O_RDONLY)\n");
     printf("ifd = %d\n", ifd);
+    printf("\n");
 
     // Open infile for reading
     in = fdopen(ifd, "r");
     perror("Trying in = fdopen(ifd, \"r\")\n");
     printf("in = %d\n", in);
+    printf("\n");
     if ((ifd < 0) | (in == NULL) ) {
         perror("Could not open input file for reading.\n");
         printf("Cleaning up and exiting gracefully.\n");
