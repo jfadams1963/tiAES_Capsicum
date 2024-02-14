@@ -51,23 +51,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Read passphrase
+    // Read passphrase we want this inside cap_enter()
     readpassphrase("Passphrase: ", pwd, sizeof(pwd), 0);
-
-    // Use the 256-bit hash of the passphrase as the key.
-    // The SHA256() function takes a char* as input and returns
-    // a unsigned char pointer.
-    key =  SHA256(pwd);
-    // Zero-out and deallocate pwd memory location
-    memset(pwd, 0, sizeof(pwd)*sizeof(pwd[0]));
-    free(pwd);
-
-    // Do key expansion
-    ke(key);
-    // Zero-out and deallocate key memory location.
-    memset(key, 0, 32*sizeof(key[0]));
-    free(key);
-
 
     // Get fd for current directory 
     dirfd = open(cwd, O_RDONLY | O_DIRECTORY);
@@ -87,9 +72,23 @@ int main(int argc, char* argv[]) {
     // Enter capability mode
     if (cap_enter() < 0 && errno != ENOSYS) {
         err(1, "Unable to enter capability mode");
-        memset(w, 0, 60*4*sizeof(w[0][0]));
         return 1;
     }
+
+    // Use the 256-bit hash of the passphrase as the key.
+    // The SHA256() function takes a char* as input and returns
+    // an unsigned char pointer.
+    key =  SHA256(pwd);
+    // Zero-out and deallocate pwd memory location
+    memset(pwd, 0, sizeof(pwd)*sizeof(pwd[0]));
+    free(pwd);
+
+    // Do key expansion
+    ke(key);
+    // Zero-out and deallocate key memory location.
+    memset(key, 0, 32*sizeof(key[0]));
+    free(key);
+
 
     if (*argv[1] == 'e') {
         // Call cbcenc()
