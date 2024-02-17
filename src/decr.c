@@ -111,7 +111,9 @@ void decr() {
 
 /* Implement CBC mode */
 void cbcdec(int dirfd, char* infn, char* outfn) {
-    int i,r,c,s,b,bsz,sz,ifd,ofd;
+
+    int i,r,c,s,b,bsz,ifd,ofd;
+    long sz;
     uchar ch,pd;
     FILE *in, *out;
 
@@ -137,9 +139,9 @@ void cbcdec(int dirfd, char* infn, char* outfn) {
     }
 
     // Size of input file 
-    fseek(in, 0, SEEK_END);
+    (void) fseek(in, 0, SEEK_END);
     bsz = ftell(in) - 16;
-    fseek(in, 0, SEEK_SET);
+    (void) fseek(in, 0, SEEK_SET);
 
     //Get IV block from the first 16 bytes of in, and fill the temp block
     for (r=0; r<4; r++) {
@@ -191,7 +193,7 @@ void cbcdec(int dirfd, char* infn, char* outfn) {
     fclose(in);
 
     // Zero out keymaterial and state 
-    memset(w, 0, 64*4*sizeof(w[0][0]));
+    memset(w, 0, 60*4*sizeof(w[0][0]));
     memset(tb, 0, 16*sizeof(tb[0][0]));
     memset(iv, 0, 16*sizeof(iv[0][0]));
     memset(ns, 0, 16*sizeof(ns[0][0]));

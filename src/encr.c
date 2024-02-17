@@ -112,20 +112,21 @@ void encr() {
 /* Implement CBC mode */
 void cbcenc(int dirfd, char* infn, char* outfn) {
 
-    int i,r,c,s,b,sz,bsz,ifd,ofd;
+    int i,r,c,s,b,bsz,ifd,ofd;
+    long sz;
     uchar ch,pd;
     FILE *in, *out;
 
     // Get infile fd for reading
     ifd = openat(dirfd, infn, O_RDONLY);
     printf("\n");
-    perror("Trying: ifd = openat(dirfd, infn, O_RDONLY)\n");
+    perror("In cbcenc() trying: ifd = openat(dirfd, infn, O_RDONLY)\n");
     printf("ifd = %d\n", ifd);
     printf("\n");
 
     // Open infile for reading
     in = fdopen(ifd, "r");
-    perror("Trying: in = fdopen(ifd, \"r\")\n");
+    perror("In cbcenc () trying: in = fdopen(ifd, \"r\")\n");
     printf("in = %d\n", in);
     printf("\n");
     if ((ifd < 0) | (in == NULL) ) {
@@ -134,21 +135,21 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
         printf("\n");
         // Zero out key schedule 
         memset(w, 0, 60*4*sizeof(w[0][0]));
-        exit(1);
+        exit(0);
     }
     
     // Size of input file 
-    fseek(in, 0, SEEK_END);
+    (void) fseek(in, 0, SEEK_END);
     sz = ftell(in);
-    fseek(in, 0, SEEK_SET);
+    (void) fseek(in, 0, SEEK_SET);
 
     // Get padding size, add to sz for byte array size.
     if ((sz%16) > 0) {
-        pd = (16-(sz%16));
+        pd = (uchar) (16-(sz%16));
     } else {
         pd = 16;
     }
-    bsz = (sz + pd);
+    bsz = (int) (sz + pd);
 
     // Next, read the bytes into an uchar array,
     // pad with padding bytes, close input file
@@ -174,7 +175,7 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
         perror("out file not open for writing in cbcenc() 1!\n");
         // Zero out byte array
         memset(barr, 0, bsz*sizeof(barr[0]));
-        exit(1); 
+        exit(0); 
     }
     for (r=0; r<4; r++) {
         for (c=0; c<4; c++) {
@@ -213,7 +214,7 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
         if (out == NULL) {
             perror("out file not open for writing in cbcenc() 2!\n");
             // Zero out keymaterial, state and byte array
-            memset(w, 0, 64*4*sizeof(w[0][0]));
+            memset(w, 0, 60*4*sizeof(w[0][0]));
             memset(iv, 0, 16*sizeof(iv[0][0]));
             memset(ns, 0, 16*sizeof(ns[0][0]));
             memset(st, 0, 16*sizeof(st[0][0]));
@@ -230,7 +231,7 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
     fclose(out);
 
     // Zero out keymaterial, state and byte array
-    memset(w, 0, 64*4*sizeof(w[0][0]));
+    memset(w, 0, 60*4*sizeof(w[0][0]));
     memset(iv, 0, 16*sizeof(iv[0][0]));
     memset(ns, 0, 16*sizeof(ns[0][0]));
     memset(st, 0, 16*sizeof(st[0][0]));

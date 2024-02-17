@@ -76,7 +76,7 @@ void ke(char* key) {
     }
 
     //expand key material
-    for (i=nk; i<64; i++) {
+    for (i=nk; i<60; i++) {
         gettmp(i-1);
         if (i % nk == 0) {
             rotword();
