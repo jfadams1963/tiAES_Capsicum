@@ -11,8 +11,5 @@ tiaes:
 debug:
 	$(CC) $(CFLAGS) -g -o tiaes tiaes.c cryputils.c encr.c decr.c keyutils.c sha256.c $(LDFLAGS)
 
-test:
-	$(CC) $(CFLAGS) -g -o test quick_test.c $(LDFLAGS)
-
 clean:
 	$(RM) tiaes test foo
