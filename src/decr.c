@@ -119,23 +119,16 @@ void cbcdec(int dirfd, char* infn, char* outfn) {
 
     // Get infile fd for reading
     ifd = openat(dirfd, infn, O_RDONLY);
-    printf("\n");
-    perror("Trying: ifd = openat(dirfd, infn, O_RDONLY)\n");
-    printf("ifd = %d\n", ifd);
-    printf("\n");
 
     // Open infile for reading
     in = fdopen(ifd, "r");
-    perror("Trying: in = fdopen(ifd, \"r\")\n");
-    printf("in = %d\n", in);
-    printf("\n");
     if ((ifd < 0) | (in == NULL) ) {
         perror("Could not open input file for reading.\n");
         printf("Cleaning up and exiting gracefully.\n");
         printf("\n");
         // Zero out key schedule
         memset(w, 0, 60*4*sizeof(w[0][0]));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Size of input file 
@@ -208,9 +201,10 @@ void cbcdec(int dirfd, char* infn, char* outfn) {
     out = fdopen(ofd, "wb");
     if ((!ofd) | (out == NULL)) {
         perror("out file not open for writing in cbcdec()!\n");
+        printf("Cleaning up and exiting gracefully.\n");
         // Zero out byte array
         memset(barr, 0, bsz*sizeof(barr[0]));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Write the array to out file

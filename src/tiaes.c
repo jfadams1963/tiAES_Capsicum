@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
     cap_rights_t rights, inrights, outrights;
     mode_t fmode = S_IRUSR | S_IWUSR | S_IRGRP;
     int dirfd, errno;
-    FILE* ifp = stdin;
-    FILE* ofp = stdout;
+    //FILE* ifp = stdin;
+    //FILE* ofp = stdout;
     char* infn = argv[2];
     char* outfn = argv[3];
     char cwd[1024];
@@ -64,29 +64,27 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    /*
     // Set rights on directory fd 
-    cap_rights_init(&rights, CAP_LOOKUP, CAP_CREATE, CAP_PREAD, \
-                    CAP_PWRITE, CAP_FCHMOD);
+    cap_rights_init(&rights, CAP_FSTAT, CAP_LOOKUP, CAP_CREATE, CAP_PREAD, \
+                    CAP_PWRITE, CAP_FCHMOD, CAP_FCNTL);
     cap_rights_limit(dirfd, &rights);
-    */
 
-    /* 
+    /*
     // Set rights on stdin and stdout
     cap_rights_init(&inrights, CAP_FSTAT, CAP_READ);
     if (cap_rights_limit(fileno(ifp), &inrights) < 0 && errno != ENOSYS)
         err(1, "Unable to limit rights for %s", "stdin");
 
-    cap_rights_init(&outrights, CAP_FSTAT, CAP_WRITE);
+    cap_rights_init(&outrights, CAP_FSTAT, CAP_WRITE, CAP_IOCTL);
     if (cap_rights_limit(fileno(ofp), &outrights) < 0 && errno != ENOSYS)
         err(1 , "Unable to limit rightsfor %s", "stdout");
+    */
 
     // Enter capability mode
     if (cap_enter() < 0 && errno != ENOSYS) {
         err(1, "Unable to enter capability mode");
         return 1;
     }
-    */
 
     // Read passphrase we want this inside cap_enter()
     //readpassphrase("Passphrase: ", pwd, sizeof(pwd), 0);

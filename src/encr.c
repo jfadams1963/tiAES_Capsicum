@@ -119,23 +119,16 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
 
     // Get infile fd for reading
     ifd = openat(dirfd, infn, O_RDONLY);
-    printf("\n");
-    perror("In cbcenc() trying: ifd = openat(dirfd, infn, O_RDONLY)\n");
-    printf("ifd = %d\n", ifd);
-    printf("\n");
 
     // Open infile for reading
     in = fdopen(ifd, "r");
-    perror("In cbcenc () trying: in = fdopen(ifd, \"r\")\n");
-    printf("in = %d\n", in);
-    printf("\n");
     if ((ifd < 0) | (in == NULL) ) {
         perror("Could not open input file for reading.\n");
         printf("Cleaning up and exiting gracefully.\n");
         printf("\n");
         // Zero out key schedule 
         memset(w, 0, 60*4*sizeof(w[0][0]));
-        exit(0);
+        exit(EXIT_FAILURE);
     }
     
     // Size of input file 
@@ -173,9 +166,10 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
     out = fdopen(ofd, "wb");
     if ((!ofd) | (out == NULL)) {
         perror("out file not open for writing in cbcenc() 1!\n");
+        printf("Cleaning up and exiting gracefully.\n");
         // Zero out byte array
         memset(barr, 0, bsz*sizeof(barr[0]));
-        exit(0); 
+        exit(EXIT_FAILURE); 
     }
     for (r=0; r<4; r++) {
         for (c=0; c<4; c++) {
@@ -213,13 +207,14 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
         // Check that the file stream is still open:
         if (out == NULL) {
             perror("out file not open for writing in cbcenc() 2!\n");
+            printf("Cleaning up and exiting gracefully.\n");
             // Zero out keymaterial, state and byte array
             memset(w, 0, 60*4*sizeof(w[0][0]));
             memset(iv, 0, 16*sizeof(iv[0][0]));
             memset(ns, 0, 16*sizeof(ns[0][0]));
             memset(st, 0, 16*sizeof(st[0][0]));
             memset(barr, 0, bsz*sizeof(barr[0]));
-            exit(-1);
+            exit(EXIT_FAILURE);
         }
         for (c=0; c<4; c++) {
             for (r=0; r<4; r++) {
