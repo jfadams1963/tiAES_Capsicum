@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     //arg checks
     if (argc != 4) {
         printf("Usage: tiaes [e,d] <infile> <outfile>\n");
-        return 1;
+        return 0;
     }
 
     // Get cwd
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Read passphrase we want this inside cap_enter()
+    // Read passphrase we really want this inside cap_enter()
     //readpassphrase("Passphrase: ", pwd, sizeof(pwd), 0);
 
     // Use the 256-bit hash of the passphrase as the key.
@@ -103,7 +103,6 @@ int main(int argc, char* argv[]) {
     memset(key, 0, 32*sizeof(key[0]));
     free(key);
 
-
     if (*argv[1] == 'e') {
         // Call cbcenc()
         cbcenc(dirfd, infn, outfn);
@@ -116,6 +115,7 @@ int main(int argc, char* argv[]) {
         // Zero out key schedule
         memset(w, 0, 60*4*sizeof(w[0][0]));
         printf("Incorrect args:\n Usage: tiaes [e,d] <infile> <outfile>\n");
+        return 0;
     }
 
 
@@ -123,6 +123,7 @@ int main(int argc, char* argv[]) {
     if (fchmodat(dirfd, outfn, fmode, AT_RESOLVE_BENEATH) == -1) {
         printf("chmod 0640 on %s failed.\n", outfn);
         perror("");
+        return 1;
     }
 
     return 0;
