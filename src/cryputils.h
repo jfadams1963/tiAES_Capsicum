@@ -7,10 +7,9 @@ extern void cpyns_st(void);
 extern void cpytb_iv(void);
 extern void cpyst_tb(void);
 extern void cpyst_iv(void);
-extern void cbcdec(char*, char*);
-extern void cbcenc(char*, char*);
+extern void cbcenc(int, char*, char*);
+extern void cbcdec(int, char*, char*);
 extern void gen_rand(unsigned char*);
-extern void get_salt(void);
 extern void get_iv(void);
 extern unsigned char* SHA256(char*);
 

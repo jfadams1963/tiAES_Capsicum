@@ -110,26 +110,31 @@ void decr() {
 
 
 /* Implement CBC mode */
-void cbcdec(char* inf, char* of) {
+void cbcdec(int dirfd, char* infn, char* outfn) {
 
-    int i,r,c,s,b,bsz,sz;
+    int i,r,c,s,b,bsz,ifd,ofd;
+    long sz;
     uchar ch,pd;
     FILE *in, *out;
 
+    // Get infile fd for reading
+    ifd = openat(dirfd, infn, O_RDONLY);
+
     // Open infile for reading
-    in = fopen(inf, "r");
-    if (!in) {
-        perror("Could not open input file for reading!");
-        printf("Cleaning up and exiting gracefully.");
-        // Zero out key schedule 
+    in = fdopen(ifd, "r");
+    if ((ifd < 0) | (in == NULL) ) {
+        perror("Could not open input file for reading.\n");
+        printf("Cleaning up and exiting gracefully.\n");
+        printf("\n");
+        // Zero out key schedule
         memset(w, 0, 60*4*sizeof(w[0][0]));
-        exit(0);
-        }
+        exit(EXIT_FAILURE);
+    }
 
     // Size of input file 
-    fseek(in, 0, SEEK_END);
+    (void) fseek(in, 0, SEEK_END);
     bsz = ftell(in) - 16;
-    fseek(in, 0, SEEK_SET);
+    (void) fseek(in, 0, SEEK_SET);
 
     //Get IV block from the first 16 bytes of in, and fill the temp block
     for (r=0; r<4; r++) {
@@ -153,18 +158,23 @@ void cbcdec(char* inf, char* of) {
 
             }
         }
+
         // Copy state to temp block
         cpyst_tb();
+
         // Call decr()
         decr();
+
         // State = state xor IV
         for (r=0; r<4; r++) {
             for (c=0; c<4; c++) {
                 st[r][c] = st[r][c] ^ iv[r][c];
             }
         }
+
         // Copy temp block to IV
         cpytb_iv();
+
         // Write decrypted bytes to byte array by _column_.
         for (c=0; c<4; c++) {
             for (r=0; r<4; r++) {
@@ -187,15 +197,17 @@ void cbcdec(char* inf, char* of) {
     sz = bsz - pd;
  
     // Open outfile for write
-    out = fopen(of, "wb");
-    // Write the array to out file
-    if (!out) {
+    ofd = openat(dirfd, outfn, O_CREAT | O_RDWR);
+    out = fdopen(ofd, "wb");
+    if ((!ofd) | (out == NULL)) {
         perror("out file not open for writing in cbcdec()!\n");
-        printf("Cleaning up and exiting gracefully.");
+        printf("Cleaning up and exiting gracefully.\n");
         // Zero out byte array
         memset(barr, 0, bsz*sizeof(barr[0]));
-        exit(0);
+        exit(EXIT_FAILURE);
     }
+
+    // Write the array to out file
     for (i=0; i<sz; i++) {
         fputc(barr[i], out);
     }

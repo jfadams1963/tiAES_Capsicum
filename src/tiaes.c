@@ -1,18 +1,14 @@
 //tiaes.c
-//(c) 2023 2024 J Adams jfa63@duck.com
-//Released under the 2-clause BSD license.
+// (c) 2023 2024 J Adams jfa63@duck.com
+// Released under the 2-clause BSD license.
+// Capsicum sandboxed version
 
 /*
  * Usage: tiaes [e,d] <infile> <outfile>
  */
 
-#ifdef BSD
-    #include <readpassphrase.h>
-#endif
-
-#ifdef LINUX
-    #include <bsd/readpassphrase.h>
-#endif
+#include <readpassphrase.h>
+#include <sys/stat.h>
 
 #include "core.h"
 
@@ -24,56 +20,110 @@
 
 int main(int argc, char* argv[]) {
 
+    cap_rights_t rights, inrights, outrights;
+    mode_t fmode = S_IRUSR | S_IWUSR | S_IRGRP;
+    int dirfd, errno;
+    //FILE* ifp = stdin;
+    //FILE* ofp = stdout;
+    char* infn = argv[2];
+    char* outfn = argv[3];
+    char cwd[1024];
+    char* pwd;
+    uchar* key;
+
+
     //arg checks
     if (argc != 4) {
         printf("Usage: tiaes [e,d] <infile> <outfile>\n");
+        return 0;
+    }
+
+    // Get cwd
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        perror("getcwd() error");
         return 1;
     }
 
     // Allocate memory for passphrase
-    char pswd[64];
-
-    // Read passphrase
-    readpassphrase("Passphrase: ", pswd, sizeof(pswd), 0);
-    get_salt();
-    uint psz = strlen(pswd);
-
-    // Combine salt and pass
-    int cmbsz = 8 + psz;
-    uchar comb[cmbsz]; 
-    for (int i=0; i<8; i++) {
-        comb[i] =  salt[i];
+    pwd = malloc(1024);
+    if (pwd == NULL) {
+        perror("Memory allocation error");
+        return 1;
     }
-    for (int i=8; i<cmbsz; i++) {
-        comb[i] = pswd[i];
+
+    // Read passphrase we want this inside cap_enter()
+    readpassphrase("Passphrase: ", pwd, sizeof(pwd), 0);
+
+    // Get fd for current directory 
+    dirfd = open(cwd, O_RDONLY | O_DIRECTORY);
+
+    if (dirfd < 0) {
+        perror("In main() could not get good fd for cwd!\n");
+        printf("dirfd=%d \n", dirfd);
+        memset(w, 0, 60*4*sizeof(w[0][0]));
+        return 1;
     }
-    
+
+    // Set rights on directory fd 
+    cap_rights_init(&rights, CAP_FSTAT, CAP_LOOKUP, CAP_CREATE, CAP_PREAD, \
+                    CAP_PWRITE, CAP_FCHMOD, CAP_FCNTL);
+    cap_rights_limit(dirfd, &rights);
+
+    /*
+    // Set rights on stdin and stdout
+    cap_rights_init(&inrights, CAP_FSTAT, CAP_READ);
+    if (cap_rights_limit(fileno(ifp), &inrights) < 0 && errno != ENOSYS)
+        err(1, "Unable to limit rights for %s", "stdin");
+
+    cap_rights_init(&outrights, CAP_FSTAT, CAP_WRITE, CAP_IOCTL);
+    if (cap_rights_limit(fileno(ofp), &outrights) < 0 && errno != ENOSYS)
+        err(1 , "Unable to limit rightsfor %s", "stdout");
+    */
+
+    // Enter capability mode
+    if (cap_enter() < 0 && errno != ENOSYS) {
+        err(1, "Unable to enter capability mode");
+        return 1;
+    }
+
+    // Read passphrase we really want this inside cap_enter()
+    //readpassphrase("Passphrase: ", pwd, sizeof(pwd), 0);
+
     // Use the 256-bit hash of the passphrase as the key.
     // The SHA256() function takes a char* as input and returns
-    // a unsigned char pointer.
-    uchar* key =  SHA256(pswd);
-
-    // Zero-out and deallocate pswd and salt memory location
-    explicit_bzero(pswd, psz);
-    explicit_bzero(comb, cmbsz);
+    // an unsigned char pointer.
+    key =  SHA256(pwd);
+    // Zero-out and deallocate pwd memory location
+    memset(pwd, 0, sizeof(pwd)*sizeof(pwd[0]));
+    free(pwd);
 
     // Do key expansion
     ke(key);
-
     // Zero-out and deallocate key memory location.
-    explicit_bzero(key, 32);
+    memset(key, 0, 32*sizeof(key[0]));
+    free(key);
 
-    // Do encrypt/decrypt
     if (*argv[1] == 'e') {
-        cbcenc(argv[2], argv[3]);
+        // Call cbcenc()
+        cbcenc(dirfd, infn, outfn);
 
     } else if (*argv[1] == 'd') {;
-        cbcdec(argv[2], argv[3]);
+        // Call cbcdec()
+        cbcdec(dirfd, infn, outfn);
 
     } else {
         // Zero out key schedule
-        explicit_bzero(w, 60*4);
+        memset(w, 0, 60*4*sizeof(w[0][0]));
         printf("Incorrect args:\n Usage: tiaes [e,d] <infile> <outfile>\n");
+        return 0;
+    }
+
+
+    // Clean up file permissions
+    if (fchmodat(dirfd, outfn, fmode, AT_RESOLVE_BENEATH) == -1) {
+        printf("chmod 0640 on %s failed.\n", outfn);
+        perror("");
+        return 1;
     }
 
     return 0;

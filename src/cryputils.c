@@ -69,7 +69,7 @@ void get_iv() {
     // Digest rand num
     uchar* hsh = SHA256(rn);
     // Clear mem location of rand num
-    explicit_bzero(rn, 64*sizeof(rn[0]));
+    memset(rn, 0, 64*sizeof(rn[0]));
 
     // Load IV
     i = 0;
@@ -80,27 +80,5 @@ void get_iv() {
         }
     }
     // Clear mem location of hash
-    explicit_bzero(hsh, 32*sizeof(hsh[0]));
-}
-
-
-// Get a random salt for passphrase
-void get_salt() {
-    int i;
-    uchar* rns = malloc(64);
-    
-    // Generat rand num
-    gen_rand(rns);
-    // Digest rand num
-    uchar* hshs = SHA256(rns);
-    // Clear mem location of rand num
-    explicit_bzero(rns, 64*sizeof(rns[0]));
-
-    // Load salt
-    for (i=0; i<8; i++) {
-        salt[i] = hshs[i];
-    }
-    // Clear mem location of hash
-    explicit_bzero(hshs, 32*sizeof(hshs[0]));
-
+    memset(hsh, 0, 32*sizeof(hsh[0]));
 }

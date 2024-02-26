@@ -5,6 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <err.h>
+#include <sys/capsicum.h>
 
 #ifndef CRYPUTILS_H
 #define CRYPUTILS_H
@@ -24,6 +29,4 @@ typedef unsigned char word[4];
 block st,tb,ns,iv; //state blocks
 unsigned int nk = 8;
 unsigned int nr = 14;
-unsigned char salt[8];
 unsigned char w[60][4];
-

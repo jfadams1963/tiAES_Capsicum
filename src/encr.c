@@ -9,7 +9,7 @@
 /* AES Cipher() */
 void encr() {
 
-    uint c,r,rd = 0;
+    int c,r,rd = 0;
 
     /* AddRoundKey()  (column of state) xor (row of RoundKey) */
     //round number 0
@@ -110,21 +110,25 @@ void encr() {
 
 
 /* Implement CBC mode */
-void cbcenc(char* inf, char* of) {
+void cbcenc(int dirfd, char* infn, char* outfn) {
 
-    int i,r,c,b,s,bsz;
+    int i,r,c,s,b,bsz,ifd,ofd;
     long sz;
     uchar ch,pd;
     FILE *in, *out;
 
+    // Get infile fd for reading
+    ifd = openat(dirfd, infn, O_RDONLY);
+
     // Open infile for reading
-    in = fopen(inf, "r");
-    if (!in) {
-        perror("Could not open input file for reading!");
-        printf("Cleaning up and exiting gracefully.");
+    in = fdopen(ifd, "r");
+    if ((ifd < 0) | (in == NULL) ) {
+        perror("Could not open input file for reading.\n");
+        printf("Cleaning up and exiting gracefully.\n");
+        printf("\n");
         // Zero out key schedule 
         memset(w, 0, 60*4*sizeof(w[0][0]));
-        exit(0);
+        exit(EXIT_FAILURE);
     }
     
     // Size of input file 
@@ -158,13 +162,14 @@ void cbcenc(char* inf, char* of) {
 
     // Open the outfile and write
     // the IV to the first 16 bytes of out. 
-    out = fopen(of, "wb");
-    if (!out) {
+    ofd = openat(dirfd, outfn, O_CREAT | O_RDWR);
+    out = fdopen(ofd, "wb");
+    if ((!ofd) | (out == NULL)) {
         perror("out file not open for writing in cbcenc() 1!\n");
-        printf("Cleaning up and exiting gracefully.");
+        printf("Cleaning up and exiting gracefully.\n");
         // Zero out byte array
         memset(barr, 0, bsz*sizeof(barr[0]));
-        exit(-1); 
+        exit(EXIT_FAILURE); 
     }
     for (r=0; r<4; r++) {
         for (c=0; c<4; c++) {
@@ -184,27 +189,32 @@ void cbcenc(char* inf, char* of) {
                 i++;
             }
         }
+
         // State = state xor IV
         for (r=0; r<4; r++) {
             for (c=0; c<4; c++) {
                 st[r][c] = st[r][c] ^ iv[r][c];
             }
         }
+
         // Call encr()
         encr();
+
         // Copy state to next IV
         cpyst_iv();
+
         // Write bytes to outfile by _column_ !
-        if (!out) {
+        // Check that the file stream is still open:
+        if (out == NULL) {
             perror("out file not open for writing in cbcenc() 2!\n");
-            printf("Cleaning up and exiting gracefully.");
+            printf("Cleaning up and exiting gracefully.\n");
             // Zero out keymaterial, state and byte array
             memset(w, 0, 60*4*sizeof(w[0][0]));
             memset(iv, 0, 16*sizeof(iv[0][0]));
             memset(ns, 0, 16*sizeof(ns[0][0]));
             memset(st, 0, 16*sizeof(st[0][0]));
             memset(barr, 0, bsz*sizeof(barr[0]));
-            exit(1);
+            exit(EXIT_FAILURE);
         }
         for (c=0; c<4; c++) {
             for (r=0; r<4; r++) {
