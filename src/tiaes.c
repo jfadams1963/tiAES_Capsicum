@@ -17,6 +17,8 @@
     #include "cryputils.h"
 #endif
 
+/* declaring external fuction ke() */
+extern void ke(uchar*);
 
 int
 main(int argc, char* argv[])

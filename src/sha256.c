@@ -42,7 +42,8 @@ uint k[64] = {
     0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
 };
 
-void SHA256Transform(SHA256_CTX *ctx, uchar data[])
+void
+SHA256Transform(SHA256_CTX *ctx, uchar data[])
 {
     uint a, b, c, d, e, f, g, h, i, j, t1, t2, m[64];
 
@@ -83,7 +84,8 @@ void SHA256Transform(SHA256_CTX *ctx, uchar data[])
     ctx->state[7] += h;
 }
 
-void SHA256Init(SHA256_CTX *ctx)
+void
+SHA256Init(SHA256_CTX *ctx)
 {
     ctx->datalen = 0;
     ctx->bitlen[0] = 0;
@@ -98,7 +100,8 @@ void SHA256Init(SHA256_CTX *ctx)
     ctx->state[7] = 0x5be0cd19;
 }
 
-void SHA256Update(SHA256_CTX *ctx, uchar data[], uint len)
+void
+SHA256Update(SHA256_CTX *ctx, uchar data[], uint len)
 {
     for (uint i = 0; i < len; ++i) {
         ctx->data[ctx->datalen] = data[i];
@@ -111,7 +114,8 @@ void SHA256Update(SHA256_CTX *ctx, uchar data[], uint len)
     }
 }
 
-void SHA256Final(SHA256_CTX *ctx, uchar hash[])
+void
+SHA256Final(SHA256_CTX *ctx, uchar hash[])
 {
     uint i = ctx->datalen;
 
@@ -151,7 +155,9 @@ void SHA256Final(SHA256_CTX *ctx, uchar hash[])
     }
 }
 
-unsigned char* SHA256(char* data) { // Changed return type from char pointer
+unsigned char* // Changed return type from char pointer
+SHA256(char* data)
+{
     int strLen = strlen(data);
     SHA256_CTX ctx;
     // We need a uchar array for tiAES -jfadams1963

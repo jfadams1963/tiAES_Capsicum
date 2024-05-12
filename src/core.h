@@ -3,6 +3,8 @@
  * Released under the 2-clause BSD license.
  */
 
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

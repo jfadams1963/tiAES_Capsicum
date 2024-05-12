@@ -1,14 +1,17 @@
-//encr.c
-//(c) 2023 2024 J Adams jfa63@duck.com
-//Released under the 2-clause BSD license.
-//Subroutines are labeled with the FIPS 197 nomenclature.
+/* encr.c
+ * (c) 2023 2024 J Adams jfa63@duck.com
+ * Released under the 2-clause BSD license.
+ */
+
+ /* Subroutines are labeled with the FIPS 197 nomenclature. */
 
 #include "core.h"
 
 
 /* AES Cipher() */
-void encr() {
-
+void
+encr()
+{
     int c,r,rd = 0;
 
     /* AddRoundKey()  (column of state) xor (row of RoundKey) */
@@ -19,7 +22,7 @@ void encr() {
         }
     }
 
-    //rounds 1 to nr-1
+    /* rounds 1 to nr-1 */
     for (rd=1; rd<nr; rd++) {
         /*SubBytes()*/
         for (r=0; r<4; r++) {
@@ -67,7 +70,7 @@ void encr() {
                 st[c][r] ^= w[rd*4+r][c];
             }
         }
-    }//end rounds 1 to nr-1
+    }/* end of rounds 1 to nr-1 */
 
     /* SubBytes() */
     for (r=0; r<4; r++) {
@@ -106,37 +109,38 @@ void encr() {
             st[c][r] ^= w[rd*4+r][c];
         }
     }
-}//end decr()
+}/* end decr() */
 
 
 /* Implement CBC mode */
-void cbcenc(int dirfd, char* infn, char* outfn) {
-
+void
+cbcenc(int dirfd, char* infn, char* outfn)
+{
     int i,r,c,s,b,bsz,ifd,ofd;
     long sz;
     uchar ch,pd;
     FILE *in, *out;
 
-    // Get infile fd for reading
+    /* Get infile fd for reading */
     ifd = openat(dirfd, infn, O_RDONLY);
 
-    // Open infile for reading
+    /* Open infile for reading */
     in = fdopen(ifd, "r");
     if ((ifd < 0) | (in == NULL) ) {
         perror("Could not open input file for reading.\n");
         printf("Cleaning up and exiting gracefully.\n");
         printf("\n");
-        // Zero out key schedule 
+        /* Zero out key schedule */
         memset(w, 0, 60*4*sizeof(w[0][0]));
         exit(EXIT_FAILURE);
     }
     
-    // Size of input file 
+    /* Size of input file */
     (void) fseek(in, 0, SEEK_END);
     sz = ftell(in);
     (void) fseek(in, 0, SEEK_SET);
 
-    // Get padding size, add to sz for byte array size.
+    /* Get padding size, add to sz for byte array size. */
     if ((sz%16) > 0) {
         pd = (uchar) (16-(sz%16));
     } else {
@@ -144,8 +148,9 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
     }
     bsz = (int) (sz + pd);
 
-    // Next, read the bytes into an uchar array,
-    // pad with padding bytes, close input file
+    /* Next, read the bytes into a uchar array,
+     * pad with padding bytes, close input file
+	 */
     uchar* barr = malloc(bsz);
     for (b=0; b<sz; b++) {
         if ((ch=fgetc(in)) != EOF) {
@@ -157,17 +162,18 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
     }
     fclose(in);
 
-    // Get Initialization Vector
+    /* Get Initialization Vector */
     get_iv();
 
-    // Open the outfile and write
-    // the IV to the first 16 bytes of out. 
+    /* Open the outfile and write
+     * the IV to the first 16 bytes of out. 
+	 */
     ofd = openat(dirfd, outfn, O_CREAT | O_RDWR);
     out = fdopen(ofd, "wb");
     if ((!ofd) | (out == NULL)) {
         perror("out file not open for writing in cbcenc() 1!\n");
         printf("Cleaning up and exiting gracefully.\n");
-        // Zero out byte array
+        /* Zero out byte array */
         memset(barr, 0, bsz*sizeof(barr[0]));
         exit(EXIT_FAILURE); 
     }
@@ -178,11 +184,12 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
         }
     }
 
-    // Do encryption reading from byte array and write
-    // to the output file. Close file.
+    /* Do encryption reading from byte array and write
+     * to the output file. Close file.
+	 */
     i = 0;
     while (i < bsz) {
-        // Read bytes into state by _column_ !
+        /* Read bytes into state by _column_ ! */
         for (c=0; c<4; c++) {
             for (r=0; r<4; r++) {
                 st[r][c] = barr[i];
@@ -190,25 +197,26 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
             }
         }
 
-        // State = state xor IV
+        /* State = state xor IV */
         for (r=0; r<4; r++) {
             for (c=0; c<4; c++) {
                 st[r][c] = st[r][c] ^ iv[r][c];
             }
         }
 
-        // Call encr()
+        /* Call encr() */
         encr();
 
-        // Copy state to next IV
+        /* Copy state to next IV */
         cpyst_iv();
 
-        // Write bytes to outfile by _column_ !
-        // Check that the file stream is still open:
+        /* Write bytes to outfile by _column_ !
+         * Check that the file stream is still open:
+		 */
         if (out == NULL) {
             perror("out file not open for writing in cbcenc() 2!\n");
             printf("Cleaning up and exiting gracefully.\n");
-            // Zero out keymaterial, state and byte array
+            /* Zero out keymaterial, state and byte array */
             memset(w, 0, 60*4*sizeof(w[0][0]));
             memset(iv, 0, 16*sizeof(iv[0][0]));
             memset(ns, 0, 16*sizeof(ns[0][0]));
@@ -225,11 +233,10 @@ void cbcenc(int dirfd, char* infn, char* outfn) {
     }
     fclose(out);
 
-    // Zero out keymaterial, state and byte array
+    /* Zero out keymaterial, state and byte array */
     memset(w, 0, 60*4*sizeof(w[0][0]));
     memset(iv, 0, 16*sizeof(iv[0][0]));
     memset(ns, 0, 16*sizeof(ns[0][0]));
     memset(st, 0, 16*sizeof(st[0][0]));
     memset(barr, 0, bsz*sizeof(barr[0]));
-}//end cbcenc()
-
+}
