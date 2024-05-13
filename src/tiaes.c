@@ -1,4 +1,5 @@
-/* tiaes.c
+/*-
+ * tiaes.c
  * (c) 2023 2024 J Adams jfa63@duck.com
  * Released under the 2-clause BSD license.
  * Capsicum sandboxed version
@@ -25,7 +26,7 @@ main(int argc, char* argv[])
 {
         cap_rights_t rights, inrights, outrights;
         mode_t fmode = S_IRUSR | S_IWUSR | S_IRGRP;
-        int dirfd, errno;
+        int dirfd, errno, ch;
         //FILE* ifp = stdin;
         //FILE* ofp = stdout;
         char* infn = argv[2];
@@ -37,7 +38,7 @@ main(int argc, char* argv[])
 
         /* arg checks */
         if (argc != 4) {
-                printf("Usage: tiaes [e,d] <infile> <outfile>\n");
+                printf("Usage: tiaes [-e,-d] <infile> <outfile>\n");
                 return 0;
         }
 
@@ -107,21 +108,24 @@ main(int argc, char* argv[])
         memset(key, 0, 32*sizeof(key[0]));
         free(key);
 
-        /* we want to switch to getopts() */
-        if (*argv[1] == 'e') {
-                /* Call cbcenc() */
-                cbcenc(dirfd, infn, outfn);
-        } else if (*argv[1] == 'd') {;
-                /* Call cbcdec() */
-                cbcdec(dirfd, infn, outfn);
-
-        } else {
-                /* Zero out key schedule */
-                memset(w, 0, 60*4*sizeof(w[0][0]));
-                printf("Incorrect args:\n Usage: tiaes [e,d] <infile> <outfile>\n");
-                return 0;
-        }
-
+		int rv = (ch = getopt(argc, argv, "ed:"));
+		if (rv != -1) {
+					switch (ch) {
+						case 'e':
+                			cbcenc(dirfd, infn, outfn);
+							break;
+                     	case 'd':
+                			cbcdec(dirfd, infn, outfn);
+							break;
+                     	case '?':
+                     	default:
+							memset(w, 0, 60*4*sizeof(w[0][0]));
+							printf("Incorrect args:\n Usage: tiaes [-e,-d] <infile> <outfile>\n");
+							return 0;
+					}
+		}
+		argc -= optind;
+		argv += optind;
 
         /* Clean up file permissions */
         if (fchmodat(dirfd, outfn, fmode, AT_RESOLVE_BENEATH) == -1) {
