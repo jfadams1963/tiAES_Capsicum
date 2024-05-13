@@ -5,7 +5,7 @@
  * Capsicum sandboxed version
  */
 
-/* Usage: tiaes [e,d] <infile> <outfile> */
+/* Usage: tiaes [-e,-d] <infile> <outfile> */
 
 
 #include <readpassphrase.h>

@@ -1,9 +1,9 @@
-/*
+/*-
 This code came from example code at:
 https://www.programmingalgorithms.com/algorithm/sha256/c/
 See Terms of Use at:
 https://www.programmingalgorithms.com/terms-of-use/
-Modifications by J Adams jfadams1963, jfa63@duck.com
+Modifications by J Adams jfadams1963 on GitHub, jfa63@duck.com
  */
 
 #include <stdio.h>

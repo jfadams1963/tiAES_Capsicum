@@ -43,7 +43,9 @@ block st = {{0x00, 0x44, 0x88, 0xcc},
 
 
 
-void print_test(block arr) {
+void
+print_test(block arr)
+{
     for (int j=0; j<4; ++j) {
         for (int i=0; i<4; ++i) {
             printf("%x ", arr[i][j]);
@@ -52,7 +54,9 @@ void print_test(block arr) {
 }
 
 
-void encr_test() {
+void
+encr_test()
+{
     int c,r,rd = 0;
     printf("Rounds %d\n", nr);
     printf("round[0].input\n");
@@ -188,7 +192,9 @@ void encr_test() {
 }//end encr_test()
  
 
-void gen_rand(unsigned char* buff) {
+void
+gen_rand(unsigned char* buff)
+{
     // Initialize the random number generator
     RAND_poll();
 
@@ -197,11 +203,12 @@ void gen_rand(unsigned char* buff) {
         printf("Error generating random number.\n");
         // handle the error 
     }
-
 }
 
 
-void get_iv() {
+void
+get_iv()
+{
     int i;
     uchar* rn = malloc(64);
 
@@ -232,7 +239,9 @@ void get_iv() {
 }
 
 // Get a random salt for passphrase
-void get_salt() {
+void
+get_salt()
+{
     int i;
     uchar* rns = malloc(64);
 
@@ -249,10 +258,11 @@ void get_salt() {
     }
     // Clear mem location of hash
     memset(hshs, 0, 32*sizeof(hshs[0]));
-
 }
 
-int main(void) {
+int
+main(void)
+{
     int sz;
 
     get_iv();

@@ -1,4 +1,5 @@
-/* cryputils.c
+/*-
+ * cryputils.c
  * (c) 2023 J Adams jfa63@duck.com
  * Released under the 2-clause BSD license.
  */
