@@ -1,5 +1,0 @@
-image:
-  file: .gitpod.Dockerfile
-tasks:
-- name: Setup environment
-  command: sh /workspace/Ti_Projects/setup.sh
