@@ -13,103 +13,103 @@
 void
 encr()
 {
-    int c,r,rd = 0;
+		int c,r,rd = 0;
 
-    /* AddRoundKey()  (column of state) xor (row of RoundKey) */
-    //round number 0
-    for (r=0; r<4; r++) {
-        for (c=0; c<4; c++) {
-            st[c][r] ^= w[rd*4+r][c];
-        }
-    }
+		/* AddRoundKey()  (column of state) xor (row of RoundKey) */
+		//round # 0
+		for (r=0; r<4; r++) {
+				for (c=0; c<4; c++) {
+						st[c][r] ^= w[rd*4+r][c];
+				}
+		}
 
-    /* rounds 1 to nr-1 */
-    for (rd=1; rd<nr; rd++) {
-        /*SubBytes()*/
-        for (r=0; r<4; r++) {
-            for (c=0; c<4; c++) {
-                st[r][c] = sbox[st[r][c]];
-            }
-        }
+		/* rounds 1 to nr-1 */
+		for (rd=1; rd<nr; rd++) {
+				/*SubBytes()*/
+				for (r=0; r<4; r++) {
+						for (c=0; c<4; c++) {
+								st[r][c] = sbox[st[r][c]];
+						}
+				}
         
-        /* ShiftRows() */
-        //row 1, no rotation
-        ns[0][0] = st[0][0];
-        ns[0][1] = st[0][1];
-        ns[0][2] = st[0][2];
-        ns[0][3] = st[0][3];
-        //row 2, 1 rotation
-        ns[1][0] = st[1][1];
-        ns[1][1] = st[1][2];
-        ns[1][2] = st[1][3];
-        ns[1][3] = st[1][0];
-        //row 3, 2 rotations
-        ns[2][0] = st[2][2];
-        ns[2][1] = st[2][3];
-        ns[2][2] = st[2][0];
-        ns[2][3] = st[2][1];
-        //row 4, 3 rotations
-        ns[3][0] = st[3][3];
-        ns[3][1] = st[3][0];
-        ns[3][2] = st[3][1];
-        ns[3][3] = st[3][2];
-        cpyns_st();
+				/* ShiftRows() */
+				//row 1, no rotation
+				ns[0][0] = st[0][0];
+				ns[0][1] = st[0][1];
+				ns[0][2] = st[0][2];
+				ns[0][3] = st[0][3];
+				//row 2, 1 rotation
+				ns[1][0] = st[1][1];
+				ns[1][1] = st[1][2];
+				ns[1][2] = st[1][3];
+				ns[1][3] = st[1][0];
+				//row 3, 2 rotations
+				ns[2][0] = st[2][2];
+				ns[2][1] = st[2][3];
+				ns[2][2] = st[2][0];
+				ns[2][3] = st[2][1];
+				//row 4, 3 rotations
+				ns[3][0] = st[3][3];
+				ns[3][1] = st[3][0];
+				ns[3][2] = st[3][1];
+				ns[3][3] = st[3][2];
+				cpyns_st();
   
-        /* MixColumns() */
-        for (c=0; c<4; c++) {
-            ns[0][c] = m2[st[0][c]] ^ m3[st[1][c]] ^ st[2][c] ^ st[3][c];
-            ns[1][c] = st[0][c] ^ m2[st[1][c]] ^ m3[st[2][c]] ^ st[3][c];
-            ns[2][c] = st[0][c] ^ st[1][c] ^ m2[st[2][c]] ^ m3[st[3][c]];
-            ns[3][c] = m3[st[0][c]] ^ st[1][c] ^ st[2][c] ^ m2[st[3][c]];
-        }
-        cpyns_st();
+				/* MixColumns() */
+				for (c=0; c<4; c++) {
+						ns[0][c] = m2[st[0][c]] ^ m3[st[1][c]] ^ st[2][c] ^ st[3][c];
+						ns[1][c] = st[0][c] ^ m2[st[1][c]] ^ m3[st[2][c]] ^ st[3][c];
+						ns[2][c] = st[0][c] ^ st[1][c] ^ m2[st[2][c]] ^ m3[st[3][c]];
+						ns[3][c] = m3[st[0][c]] ^ st[1][c] ^ st[2][c] ^ m2[st[3][c]];
+				}
+				cpyns_st();
 
-        /* AddRoundKey() */
-        //round rd
-        for (r=0; r<4; r++) {
-            for (c=0; c<4; c++) {
-                st[c][r] ^= w[rd*4+r][c];
-            }
-        }
-    }/* end of rounds 1 to nr-1 */
+				/* AddRoundKey() */
+				//round  #rd
+				for (r=0; r<4; r++) {
+						for (c=0; c<4; c++) {
+								st[c][r] ^= w[rd*4+r][c];
+						}
+				}
+		}/* end of rounds 1 to nr-1 */
 
-    /* SubBytes() */
-    for (r=0; r<4; r++) {
-        for (c=0; c<4; c++) {
-            st[r][c] = sbox[st[r][c]];
-        }
-    }
+		/* SubBytes() */
+		for (r=0; r<4; r++) {
+				for (c=0; c<4; c++) {
+						st[r][c] = sbox[st[r][c]];
+				}
+		}
 
-    /* ShiftRows() */
-    //row 1, no rotation
-    ns[0][0] = st[0][0];
-    ns[0][1] = st[0][1];
-    ns[0][2] = st[0][2];
-    ns[0][3] = st[0][3];
-    //row 2, 1 rotation
-    ns[1][0] = st[1][1];
-    ns[1][1] = st[1][2];
-    ns[1][2] = st[1][3];
-    ns[1][3] = st[1][0];
-    //row 3, 2 rotations
-    ns[2][0] = st[2][2];
-    ns[2][1] = st[2][3];
-    ns[2][2] = st[2][0];
-    ns[2][3] = st[2][1];
-    //row 4, 3 rotations
-    ns[3][0] = st[3][3];
-    ns[3][1] = st[3][0];
-    ns[3][2] = st[3][1];
-    ns[3][3] = st[3][2];
-    cpyns_st();
+		/* ShiftRows() */
+		//row 1, no rotation
+		ns[0][0] = st[0][0];
+		ns[0][1] = st[0][1];
+		ns[0][2] = st[0][2];
+		ns[0][3] = st[0][3];
+		//row 2, 1 rotation
+		ns[1][0] = st[1][1];
+		ns[1][1] = st[1][2];
+		ns[1][2] = st[1][3];
+		ns[1][3] = st[1][0];
+		//row 3, 2 rotations
+		ns[2][0] = st[2][2];
+		ns[2][1] = st[2][3];
+		ns[2][2] = st[2][0];
+		ns[2][3] = st[2][1];
+		//row 4, 3 rotations
+		ns[3][0] = st[3][3];
+		ns[3][1] = st[3][0];
+		ns[3][2] = st[3][1];
+		ns[3][3] = st[3][2];
+		cpyns_st();
 
-    /* AddRoundKey() */
-    //round nr
-    for (r=0; r<4; r++) {
-        for (c=0; c<4; c++) {
-            st[c][r] ^= w[rd*4+r][c];
-        }
-    }
+		/* AddRoundKey() */
+		//round nr
+		for (r=0; r<4; r++) {
+				for (c=0; c<4; c++) {
+						st[c][r] ^= w[rd*4+r][c];
+				}
+		}
 }/* end decr() */
 
 
