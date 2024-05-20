@@ -79,9 +79,6 @@ ke(char* key)
 		 * and other unsigned int variables 
 		 */
 		uint i;
-		/* We hardwire 'nk' and 'nr' for a 256bit key */
-		nk = 8;
-		nr = 14;
 
 		/* load primary key in to the top of key schedule */
 		i = 0;
