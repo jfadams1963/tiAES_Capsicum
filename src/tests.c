@@ -24,23 +24,26 @@ block st = {{0x32, 0x88, 0x31, 0xe0},
             {0xa8, 0x8d, 0xa2, 0x34}};
 */
 
-// 256-bit FIPS key for encryption
-// 00 01 02 03 04 05 06 07
-// 08 09 0a 0b 0c 0d 0e 0f
-// 10 11 12 13 14 15 16 17
-// 18 19 1a 1b 1c 1d 1e 1f
+/* 256-bit FIPS key for encryption
+ * 00 01 02 03 04 05 06 07
+ * 08 09 0a 0b 0c 0d 0e 0f
+ * 10 11 12 13 14 15 16 17
+ * 18 19 1a 1b 1c 1d 1e 1f
+ */
 uchar ckey256[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
                    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
                    0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
 
-// Test plain text state vector from FIPS 197 for encryption
-// 00 11 22 33 44 55 66 77 88 99 aa bb cc dd ee ff
+/* Test plain text state vector from FIPS 197 for encryption
+ * 00 11 22 33 44 55 66 77 88 99 aa bb cc dd ee ff
+ */
 block st = {{0x00, 0x44, 0x88, 0xcc},
             {0x11, 0x55, 0x99, 0xdd},
             {0x22, 0x66, 0xaa, 0xee},
             {0x33, 0x77, 0xbb, 0xff}};
 
+unsigned char salt[8];
 
 
 void
@@ -215,6 +218,7 @@ get_iv()
     gen_rand(rn);
 
     // Display the random number in hex
+	printf("Random gen:\n");
     for (i = 0; i < 64; i++) {
         printf("%02x ", rn[i]);
     }
@@ -223,10 +227,11 @@ get_iv()
     uchar* hsh = SHA256(rn);
     memset(rn, 0, 64*sizeof(rn[0]));
 
+	printf("SHA256 hash of random gen used for IV:\n");
     for (i = 0; i < 32; i++) {
         printf("%02x ", hsh[i]);
     }
-    printf("\n");
+    printf("\n\n");
 
     i = 0;
     for (int r=0; r<4; r++) {
@@ -267,19 +272,22 @@ main(void)
 
     get_iv();
     // display iv
-    printf("\n");
+	printf("");
+    printf("Initialisation Vector:\n");
     for (int r=0; r<4; r++) {
         for (int c=0; c<4; c++) {
-            printf("%02x", iv[r][c]);
+            printf("%02x ", iv[r][c]);
         }
         printf("\n");
     }
+	printf("\n");
 
     get_salt();
     // display salt
-    printf("\n");
+	printf("");
+    printf("Passphrase salt (using random passwd for test):\n");
     for (int i=0; i<8; i++) {
-        printf("%02x", salt[i]);
+        printf("%02x ", salt[i]);
     }
     printf("\n");
 
